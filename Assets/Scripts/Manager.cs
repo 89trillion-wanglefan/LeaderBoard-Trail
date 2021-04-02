@@ -195,7 +195,9 @@ public class Manager : MonoBehaviour
     {
         UI.SetActive(true);
         Button.SetActive(false);
-        if (initTrigger) StartCoroutine(Init()); //用协程初始化，避免用户等待
+        if (!initTrigger) return;
+        StartCoroutine(Init());
+        initTrigger = !initTrigger;
     }
 
     /// <summary>
