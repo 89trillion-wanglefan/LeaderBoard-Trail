@@ -217,7 +217,6 @@ public class Manager : MonoBehaviour
     /// <returns></returns>
     IEnumerator Init()
     {
-        fixedCount = (int) (rectTransform.rect.size.y / (layout.spacing.y + layout.cellSize.y)) + 2; //计算需要的显示元素数量，减少开销
         StreamReader
             streamreader = new StreamReader(Application.dataPath + "/StreamingAssets/ranklist.json"); //读取数据，转换成数据流
         string str = streamreader.ReadToEnd();
@@ -236,6 +235,8 @@ public class Manager : MonoBehaviour
         UserList.Sort((x, y) => -x.Trophy.CompareTo(y.Trophy)); //给用户排名
         SetRankInfo(PlayerCase, 0);
         totalCount = UserList.Count;
+        fixedCount = Mathf.Min((int) (rectTransform.rect.size.y / (layout.spacing.y + layout.cellSize.y)) + 2,
+            totalCount); //计算需要的显示元素数量，减少开销
         content = scrollRect.content;
         scrollRect.onValueChanged.AddListener(v => OnScroll());
         //设置头下标和尾下标
