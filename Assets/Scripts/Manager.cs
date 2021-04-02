@@ -11,15 +11,15 @@ using UnityEngine.UI;
 /// </summary>
 public class Manager : MonoBehaviour
 {
-    public GameObject UI;//UI的Canvas
-    public GameObject Button;//按钮的Canvas
-    public ShowPlayerInfo PlayerCase;//显示用户信息的组件
-    public Text Countdown;//倒计时文本
-    private List<Users> UserList = new List<Users>();//用户信息列表
-    public ScrollRect scrollRect;//滚动栏组件
-    public RectTransform rectTransform;//滚动栏RectTransform，获取高度用
-    [Header("元素的预制体")] public ShowPlayerInfo itemPrefab;//滚动栏中单个显示元素的预置体
-    public long userID = 3716954261;//用户的id，查询用户用
+    public GameObject UI; //UI的Canvas
+    public GameObject Button; //按钮的Canvas
+    public ShowPlayerInfo PlayerCase; //显示用户信息的组件
+    public Text Countdown; //倒计时文本
+    private List<Users> UserList = new List<Users>(); //用户信息列表
+    public ScrollRect scrollRect; //滚动栏组件
+    public RectTransform rectTransform; //滚动栏RectTransform，获取高度用
+    [Header("元素的预制体")] public ShowPlayerInfo itemPrefab; //滚动栏中单个显示元素的预置体
+    public long userID = 3716954261; //用户的id，查询用户用
     private RectTransform content; //滑动框的Content
     [SerializeField] private GridLayoutGroup layout; //布局组件
 
@@ -29,17 +29,10 @@ public class Manager : MonoBehaviour
     private int headIndex; //头下标
     private int tailIndex; //尾下标
     private Vector2 firstItemAnchoredPos; //第一个元素的坐标
-    private int fixedCount;//总的滚动元素需要数量
-    private JSONNode rankInfo;//读取排名信息用
-    private int countdown;//倒计时，单位秒
-
-    // Start is called before the first frame update
-    void Start()
-    {
-        fixedCount = (int) (rectTransform.rect.size.y / (layout.spacing.y + layout.cellSize.y)) + 2;//计算需要的显示元素数量，减少开销
-        UI.SetActive(false);//关闭排名UI
-        StartCoroutine(Init());//用协程初始化，避免用户等待
-    }
+    private int fixedCount; //总的滚动元素需要数量
+    private JSONNode rankInfo; //读取排名信息用
+    private int countdown; //倒计时，单位秒
+    private bool initTrigger = true; //第一次按按钮初始化，之后不用
 
     /// <summary>
     /// 监听滚动的事件，在检测到有元素超出显示范围时复用
@@ -166,7 +159,7 @@ public class Manager : MonoBehaviour
     /// <returns></returns>
     public string FormatDayTime(int totalSeconds)
     {
-        int minutes = totalSeconds/ 60;
+        int minutes = totalSeconds / 60;
         int seconds = totalSeconds % 60;
         int hours = minutes / 60;
         minutes %= 60;
@@ -202,6 +195,7 @@ public class Manager : MonoBehaviour
     {
         UI.SetActive(true);
         Button.SetActive(false);
+        if (initTrigger) StartCoroutine(Init()); //用协程初始化，避免用户等待
     }
 
     /// <summary>
@@ -221,6 +215,7 @@ public class Manager : MonoBehaviour
     /// <returns></returns>
     IEnumerator Init()
     {
+        fixedCount = (int) (rectTransform.rect.size.y / (layout.spacing.y + layout.cellSize.y)) + 2; //计算需要的显示元素数量，减少开销
         StreamReader
             streamreader = new StreamReader(Application.dataPath + "/StreamingAssets/ranklist.json"); //读取数据，转换成数据流
         string str = streamreader.ReadToEnd();
@@ -236,7 +231,7 @@ public class Manager : MonoBehaviour
             UserList.Add(user);
         }
 
-        UserList.Sort((x, y) => -x.Trophy.CompareTo(y.Trophy));//给用户排名
+        UserList.Sort((x, y) => -x.Trophy.CompareTo(y.Trophy)); //给用户排名
         SetRankInfo(PlayerCase, 0);
         totalCount = UserList.Count;
         content = scrollRect.content;
