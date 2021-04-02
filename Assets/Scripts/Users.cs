@@ -2,6 +2,9 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+/// <summary>
+/// 用户的数据类
+/// </summary>
 public class Users
 {
     public long Id { get; set; }

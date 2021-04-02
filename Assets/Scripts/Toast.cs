@@ -2,7 +2,9 @@
 using UnityEngine;
 using DG.Tweening;
 using UnityEngine.UI;
-
+/// <summary>
+/// toast的单例实现
+/// </summary>
 [RequireComponent(typeof(Toast))]
 public class Toast : MonoBehaviour
 {
@@ -12,11 +14,17 @@ public class Toast : MonoBehaviour
     [SerializeField] private Image toast;
     [SerializeField] private Text txt;
 
+    /// <summary>
+    /// 初始化时创建
+    /// </summary>
     private void Awake()
     {
         instance = this;
     }
 
+    /// <summary>
+    /// 公共属性
+    /// </summary>
     public static Toast Instance
     {
         get
@@ -31,6 +39,11 @@ public class Toast : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// toast的显示动画
+    /// </summary>
+    /// 显示的内容
+    /// <param name="info"></param>
     public void ShowToast(string info)
     {
         txt.text = info;

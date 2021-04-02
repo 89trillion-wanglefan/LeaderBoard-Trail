@@ -2,6 +2,9 @@
 using UnityEngine.PlayerLoop;
 using UnityEngine.UI;
 
+/// <summary>
+/// 设置显示元素的显示内容用的类
+/// </summary>
 public class ShowPlayerInfo : MonoBehaviour
 {
     [SerializeField]
@@ -17,11 +20,21 @@ public class ShowPlayerInfo : MonoBehaviour
 
     public RectTransform rectTransform;
 
+    /// <summary>
+    /// 点击时调用toast的方法
+    /// </summary>
     public void Click()
     {
         Toast.Instance.ShowToast($"User: {playername.text}, Rank: {rank.text}");
     }
     
+    /// <summary>
+    /// 设置显示元素的内容
+    /// </summary>
+    /// 显示的用户信息
+    /// <param name="user"></param>
+    /// 显示的用户排名
+    /// <param name="index"></param>
     public void ShowRankInfo(Users user,int index)
     {
         //prefab调整方法

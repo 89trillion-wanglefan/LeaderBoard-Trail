@@ -11,44 +11,41 @@ using UnityEngine.UI;
 /// </summary>
 public class Manager : MonoBehaviour
 {
-    public delegate void ShowEventHandler(Users user,int index);
-
-    public static event ShowEventHandler UpdateINfo;
-        
-    public GameObject UI;
-    public GameObject Button;
-    public ShowPlayerInfo PlayerCase;
-    public Text Countdown;
-    private List<Users> UserList = new List<Users>();
-    public ScrollRect scrollRect;
-    [Header("固定的Item数量")] public int fixedCount;
-    [Header("Item的预制体")] public ShowPlayerInfo itemPrefab;
-    public long userID = 3716954261;
+    public GameObject UI;//UI的Canvas
+    public GameObject Button;//按钮的Canvas
+    public ShowPlayerInfo PlayerCase;//显示用户信息的组件
+    public Text Countdown;//倒计时文本
+    private List<Users> UserList = new List<Users>();//用户信息列表
+    public ScrollRect scrollRect;//滚动栏组件
+    public RectTransform rectTransform;//滚动栏RectTransform，获取高度用
+    [Header("元素的预制体")] public ShowPlayerInfo itemPrefab;//滚动栏中单个显示元素的预置体
+    public long userID = 3716954261;//用户的id，查询用户用
     private RectTransform content; //滑动框的Content
     [SerializeField] private GridLayoutGroup layout; //布局组件
 
-    private List<ShowPlayerInfo> dataList = new List<ShowPlayerInfo>(); //实例列表
+    private List<ShowPlayerInfo> dataList = new List<ShowPlayerInfo>(); //元素实例列表，控制滚动时变动哪个元素
     private List<ShowPlayerInfo> dataListOrigin = new List<ShowPlayerInfo>(); //保存原始顺序
     private int totalCount; //总的数据数量
     private int headIndex; //头下标
     private int tailIndex; //尾下标
     private Vector2 firstItemAnchoredPos; //第一个元素的坐标
-
-    private JSONNode rankInfo;
-
-    private int countdown;
+    private int fixedCount;//总的滚动元素需要数量
+    private JSONNode rankInfo;//读取排名信息用
+    private int countdown;//倒计时，单位秒
 
     // Start is called before the first frame update
     void Start()
     {
-        StartCoroutine(Init());
+        fixedCount = (int) (rectTransform.rect.size.y / (layout.spacing.y + layout.cellSize.y)) + 2;//计算需要的显示元素数量，减少开销
+        UI.SetActive(false);//关闭排名UI
+        StartCoroutine(Init());//用协程初始化，避免用户等待
     }
 
-
+    /// <summary>
+    /// 监听滚动的事件，在检测到有元素超出显示范围时复用
+    /// </summary>
     private void OnScroll()
     {
-        //Debug.Log(v);
-        //Debug.Log(content.anchoredPosition.y);
         //向下滚动
         while (content.anchoredPosition.y >=
                layout.padding.top + (headIndex + 1) * (layout.cellSize.y + layout.spacing.y)
@@ -87,6 +84,9 @@ public class Manager : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// 初始化排名显示
+    /// </summary>
     private void InitRankList()
     {
         for (int i = 0; i < fixedCount; i++)
@@ -98,6 +98,9 @@ public class Manager : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// 关闭按钮调用，重新初始化排名列表，减少创建开销
+    /// </summary>
     private void ReInitRankList()
     {
         dataList.Clear();
@@ -112,6 +115,9 @@ public class Manager : MonoBehaviour
         tailIndex = fixedCount - 1;
     }
 
+    /// <summary>
+    /// 获取第一个显示元素的位置
+    /// </summary>
     private void GetFirstItemAnchoredPos()
     {
         firstItemAnchoredPos = new Vector2
@@ -121,6 +127,13 @@ public class Manager : MonoBehaviour
         );
     }
 
+    /// <summary>
+    /// 设置每个显示元素的位置
+    /// </summary>
+    /// 显示元素
+    /// <param name="trans"></param>
+    /// 显示的是第几个元素
+    /// <param name="index"></param>
     private void SetRankPos(ShowPlayerInfo trans, int index)
     {
         trans.rectTransform.anchoredPosition = new Vector2
@@ -132,14 +145,26 @@ public class Manager : MonoBehaviour
         );
     }
 
+    /// <summary>
+    /// 设置显示元素内容
+    /// </summary>
+    /// 显示元素
+    /// <param name="trans"></param>
+    /// 对应显示内容顺序
+    /// <param name="index"></param>
     private void SetRankInfo(ShowPlayerInfo trans, int index)
     {
-        UpdateINfo+= trans.ShowRankInfo;
-        if (UpdateINfo != null) Manager.UpdateINfo(UserList[index], index);
-        UpdateINfo-= trans.ShowRankInfo;
+        trans.ShowRankInfo(UserList[index], index);
     }
 
-    public string FormatDayTime(int totalSeconds) //时间格式转换
+    /// <summary>
+    /// 事件格式转换
+    /// </summary>
+    /// 秒的数量
+    /// <param name="totalSeconds"></param>
+    /// 返回倒计时字符串样式
+    /// <returns></returns>
+    public string FormatDayTime(int totalSeconds)
     {
         int minutes = totalSeconds/ 60;
         int seconds = totalSeconds % 60;
@@ -154,7 +179,12 @@ public class Manager : MonoBehaviour
         return $"Ends in:{dd}d {hh}h {mm}m {ss}s";
     }
 
-    //倒计时组件
+    /// <summary>
+    /// 刷新倒计时用的协程
+    /// </summary>
+    /// 秒的数量
+    /// <param name="total"></param>
+    /// <returns></returns>
     IEnumerator StartCountdown(int total)
     {
         for (; total > 0; total--)
@@ -165,12 +195,18 @@ public class Manager : MonoBehaviour
         }
     }
 
-    public void ToUI() //button 按键
+    /// <summary>
+    /// 切换到排名UI
+    /// </summary>
+    public void ToUI()
     {
         UI.SetActive(true);
         Button.SetActive(false);
     }
 
+    /// <summary>
+    /// 关闭排名UI
+    /// </summary>
     public void Close()
     {
         UI.SetActive(false);
@@ -179,6 +215,10 @@ public class Manager : MonoBehaviour
         ReInitRankList();
     }
 
+    /// <summary>
+    /// 初始化用的协程
+    /// </summary>
+    /// <returns></returns>
     IEnumerator Init()
     {
         StreamReader
@@ -196,7 +236,7 @@ public class Manager : MonoBehaviour
             UserList.Add(user);
         }
 
-        UserList.Sort((x, y) => -x.Trophy.CompareTo(y.Trophy));
+        UserList.Sort((x, y) => -x.Trophy.CompareTo(y.Trophy));//给用户排名
         SetRankInfo(PlayerCase, 0);
         totalCount = UserList.Count;
         content = scrollRect.content;
